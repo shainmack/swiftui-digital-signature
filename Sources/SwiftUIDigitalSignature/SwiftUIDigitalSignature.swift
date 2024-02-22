@@ -27,7 +27,7 @@ public struct SignatureView: View {
     private var showColorOptions = false
 
     @State private var fontFamily = fontFamlies[0]
-    @State private var color
+    @State private var color: Color
 
     @State private var drawing = DrawingPath()
     @State private var image = UIImage()
@@ -90,6 +90,7 @@ public struct SignatureView: View {
                                   color: $color)
             }
         }
+        .cornerRadius(15)
         .padding(.vertical)
     }
 
