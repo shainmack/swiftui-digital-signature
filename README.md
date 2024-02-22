@@ -1,3 +1,4 @@
+This is a fork of [Globulus'](https://github.com/globulus) repo that adds some additional params to set a default color and whether or not a color selector should appear
 # SwiftUIDigitalSignature
 
 **Plug'n' play Digital Signatures in SwiftUI**.
