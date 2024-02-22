@@ -1,4 +1,4 @@
-This is a fork of [Globulus'](https://github.com/globulus) repo that adds some additional params to set a default color and whether or not a color selector should appear
+This is a fork of [@Globulus'](https://github.com/globulus) repo that adds some additional params to set a default color and whether or not a color selector should appear
 # SwiftUIDigitalSignature
 
 **Plug'n' play Digital Signatures in SwiftUI**.
@@ -39,7 +39,7 @@ struct SignatureViewTest: View {
             self.image = image
           }, onCancel: {
                   
-          }))
+          }, color: .red, showColorOptions: true))
         if image != nil {
             Image(uiImage: image!)
         }
@@ -49,8 +49,18 @@ struct SignatureViewTest: View {
 }
 ```
 
+## Parameters
+
+| Parameter | Description                                                                    |
+| :----------------- | :-------------------------------------------------------------------- |
+| `onSave`           | Closure that sets what to do when the save button is tapped           |
+| `onCancel`         | Closure that sets what to do when the cancel button is tapped         |
+| `color`            | SwiftUI Color param for writing color (Color). *Default = `.black`*   |
+| `showColorOptions` | A boolean option to show the color picker (Bool). *Default = `false`* |
+
 ## Changelog
 
+* 0.1.3 - Adds rounded corners, selectable writing color, and choice of showing or hiding color selector
 * 0.1.2 - Added `availableTabs` initializer param.
 * 0.1.1 - Fixed drawing bounds.
 * 0.1.0 - Initial release.
