@@ -3,10 +3,11 @@
 //  SwiftUI Recipes
 //
 //  Created by Gordan Glavaš on 28.06.2021..
+//  Updated by @shainmack on 22/2/2024
 //
 
-import SwiftUI
 import CoreGraphics
+import SwiftUI
 import UIKit
 
 private let fontFamlies = ["Zapfino", "SavoyeLetPlain", "SnellRoundhand", "SnellRoundhand-Black"]
@@ -16,32 +17,34 @@ private let maxHeight: CGFloat = 160
 private let lineWidth: CGFloat = 5
 
 public struct SignatureView: View {
-  public let availableTabs: [Tab]
+    public let availableTabs: [Tab]
     public let onSave: (UIImage) -> Void
     public let onCancel: () -> Void
-    
-  @State private var selectedTab: Tab
-    
+
+    @State private var selectedTab: Tab
+
     @State private var saveSignature = false
-    
+    private var showColorOptions = false
+
     @State private var fontFamily = fontFamlies[0]
-    @State private var color = Color.blue
-    
+    @State private var color
+
     @State private var drawing = DrawingPath()
     @State private var image = UIImage()
     @State private var isImageSet = false
     @State private var text = ""
-    
-  public init(availableTabs: [Tab] = Tab.allCases,
-              onSave: @escaping (UIImage) -> Void,
-              onCancel: @escaping () -> Void) {
-    self.availableTabs = availableTabs
-    self.onSave = onSave
-    self.onCancel = onCancel
-    
-    self.selectedTab = availableTabs.first!
-  }
-    
+
+    public init(availableTabs: [Tab] = Tab.allCases,
+                onSave: @escaping (UIImage) -> Void,
+                onCancel: @escaping () -> Void, color: Color = .black, showColorOptions: Bool = false) {
+        self.availableTabs = availableTabs
+        self.onSave = onSave
+        self.onCancel = onCancel
+        self.showColorOptions = showColorOptions
+        self.color = color
+        selectedTab = availableTabs.first!
+    }
+
     public var body: some View {
         VStack {
             HStack {
@@ -49,26 +52,30 @@ public struct SignatureView: View {
                 Spacer()
                 Button("Cancel", action: onCancel)
             }
-          if availableTabs.count > 1 {
-            Picker(selection: $selectedTab, label: EmptyView()) {
-                ForEach(availableTabs, id: \.self) { tab in
-                  Text(tab.title)
-                    .tag(tab)
+            if availableTabs.count > 1 {
+                Picker(selection: $selectedTab, label: EmptyView()) {
+                    ForEach(availableTabs, id: \.self) { tab in
+                        Text(tab.title)
+                            .tag(tab)
+                    }
                 }
-            }.pickerStyle(SegmentedPickerStyle())
-          }
+                .pickerStyle(SegmentedPickerStyle())
+            }
             signatureContent
             Button("Clear signature", action: clear)
             HStack {
                 if selectedTab == Tab.type {
                     FontFamilyPicker(selection: $fontFamily)
                 }
-                ColorPickerCompat(selection: $color)
+                if showColorOptions {
+                    ColorPickerCompat(selection: $color)
+                }
             }
             Spacer()
-        }.padding()
+        }
+        .padding()
     }
-    
+
     private var signatureContent: some View {
         return Group {
             if selectedTab == .draw {
@@ -82,9 +89,10 @@ public struct SignatureView: View {
                                   fontFamily: $fontFamily,
                                   color: $color)
             }
-        }.padding(.vertical)
+        }
+        .padding(.vertical)
     }
-    
+
     private func extractImageAndHandle() {
         let image: UIImage
         switch selectedTab {
@@ -106,13 +114,13 @@ public struct SignatureView: View {
             let rendererWidth: CGFloat = 512
             let rendererHeight: CGFloat = 128
             let renderer = UIGraphicsImageRenderer(size: CGSize(width: rendererWidth, height: rendererHeight))
-            let uiImage = renderer.image { ctx in
+            let uiImage = renderer.image { _ in
                 let paragraphStyle = NSMutableParagraphStyle()
                 paragraphStyle.alignment = .center
 
                 let attrs = [NSAttributedString.Key.font: UIFont(name: fontFamily, size: bigFontSize)!,
                              NSAttributedString.Key.foregroundColor: color.uiColor,
-                             NSAttributedString.Key.paragraphStyle: paragraphStyle
+                             NSAttributedString.Key.paragraphStyle: paragraphStyle,
                 ]
                 text.draw(with: CGRect(x: 0, y: 0, width: rendererWidth, height: rendererHeight),
                           options: .usesLineFragmentOrigin,
@@ -130,36 +138,36 @@ public struct SignatureView: View {
         }
         onSave(image)
     }
-    
+
     private func clear() {
         drawing = DrawingPath()
         image = UIImage()
         isImageSet = false
         text = ""
     }
-    
-  public enum Tab: CaseIterable, Hashable {
-    case draw, image, type
-    
-    var title: LocalizedStringKey {
-      switch self {
-      case .draw:
-        return "Draw"
-      case .image:
-        return "Image"
-      case .type:
-        return "Type"
-      }
+
+    public enum Tab: CaseIterable, Hashable {
+        case draw, image, type
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .draw:
+                return "Draw"
+            case .image:
+                return "Image"
+            case .type:
+                return "Type"
+            }
+        }
     }
-  }
 }
 
 struct ColorPickerCompat: View {
     @Binding var selection: Color
-    
+
     @State private var showPopover = false
     private let availableColors: [Color] = [.blue, .black, .red]
-    
+
     var body: some View {
         if #available(iOS 14.0, *) {
             ColorPicker(selection: $selection) {
@@ -182,7 +190,7 @@ struct ColorPickerCompat: View {
             }
         }
     }
-    
+
     private func colorCircle(_ color: Color) -> some View {
         Circle()
             .foregroundColor(color)
@@ -192,9 +200,9 @@ struct ColorPickerCompat: View {
 
 struct FontFamilyPicker: View {
     @Binding var selection: String
-    
+
     @State private var showPopover = false
-    
+
     var body: some View {
         Button(action: {
             showPopover.toggle()
@@ -213,7 +221,7 @@ struct FontFamilyPicker: View {
             }
         }
     }
-    
+
     private func buttonLabel(_ fontFamily: String, size: CGFloat) -> Text {
         Text(placeholderText)
             .font(.custom(fontFamily, size: size))
@@ -222,98 +230,96 @@ struct FontFamilyPicker: View {
 }
 
 struct FramePreferenceKey: PreferenceKey {
-  static var defaultValue: CGRect = .zero
+    static var defaultValue: CGRect = .zero
 
-  static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-    value = nextValue()
-  }
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
+    }
 }
 
 struct SignatureDrawView: View {
-  @Binding var drawing: DrawingPath
-  @Binding var fontFamily: String
-  @Binding var color: Color
-  
-  @State private var drawingBounds: CGRect = .zero
-    
+    @Binding var drawing: DrawingPath
+    @Binding var fontFamily: String
+    @Binding var color: Color
+
+    @State private var drawingBounds: CGRect = .zero
+
     var body: some View {
-      ZStack {
-        Color.white
-          .background(GeometryReader { geometry in
-            Color.clear.preference(key: FramePreferenceKey.self,
-                                   value: geometry.frame(in: .local))
-          })
-          .onPreferenceChange(FramePreferenceKey.self) { bounds in
-            drawingBounds = bounds
-          }
-        if drawing.isEmpty {
-          Text(placeholderText)
-            .foregroundColor(.gray)
-            .font(.custom(fontFamily, size: bigFontSize))
-        } else {
-          DrawShape(drawingPath: drawing)
-            .stroke(lineWidth: lineWidth)
-            .foregroundColor(color)
+        ZStack {
+            Color.white
+                .background(GeometryReader { geometry in
+                    Color.clear.preference(key: FramePreferenceKey.self,
+                                           value: geometry.frame(in: .local))
+                })
+                .onPreferenceChange(FramePreferenceKey.self) { bounds in
+                    drawingBounds = bounds
+                }
+            if drawing.isEmpty {
+                Text(placeholderText)
+                    .foregroundColor(.gray)
+                    .font(.custom(fontFamily, size: bigFontSize))
+            } else {
+                DrawShape(drawingPath: drawing)
+                    .stroke(lineWidth: lineWidth)
+                    .foregroundColor(color)
+            }
         }
-      }
-      .frame(height: maxHeight)
-      .gesture(DragGesture()
-        .onChanged( { value in
-          if drawingBounds.contains(value.location) {
-            drawing.addPoint(value.location)
-          } else {
-            drawing.addBreak()
-          }
-        }).onEnded( { value in
-          drawing.addBreak()
-        }))
-      .overlay(RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.gray))
-  }
+        .frame(height: maxHeight)
+        .gesture(DragGesture()
+            .onChanged({ value in
+                if drawingBounds.contains(value.location) {
+                    drawing.addPoint(value.location)
+                } else {
+                    drawing.addBreak()
+                }
+            }).onEnded({ _ in
+                drawing.addBreak()
+            }))
+        .overlay(RoundedRectangle(cornerRadius: 4)
+            .stroke(Color.gray))
+    }
 }
 
 struct DrawingPath {
     private(set) var points = [CGPoint]()
     private var breaks = [Int]()
-    
+
     var isEmpty: Bool {
         points.isEmpty
     }
-    
+
     mutating func addPoint(_ point: CGPoint) {
         points.append(point)
     }
-    
+
     mutating func addBreak() {
         breaks.append(points.count)
     }
-    
+
     var cgPath: CGPath {
         let path = CGMutablePath()
         guard let firstPoint = points.first else { return path }
         path.move(to: firstPoint)
-        for i in 1..<points.count {
+        for i in 1 ..< points.count {
             if breaks.contains(i) {
                 path.move(to: points[i])
             } else {
                 path.addLine(to: points[i])
             }
-
         }
         return path
     }
-    
+
     var path: Path {
         var path = Path()
         guard let firstPoint = points.first else { return path }
         path.move(to: firstPoint)
-        for i in 1..<points.count {
+        for i in 1 ..< points.count {
             if breaks.contains(i) {
                 path.move(to: points[i])
             } else {
                 path.addLine(to: points[i])
             }
-
         }
         return path
     }
@@ -321,7 +327,7 @@ struct DrawingPath {
 
 struct DrawShape: Shape {
     let drawingPath: DrawingPath
-    
+
     func path(in rect: CGRect) -> Path {
         drawingPath.path
     }
@@ -330,9 +336,9 @@ struct DrawShape: Shape {
 struct SignatureImageView: View {
     @Binding var isSet: Bool
     @Binding var selection: UIImage
-    
+
     @State private var showPopover = false
-    
+
     var body: some View {
         Button(action: {
             showPopover.toggle()
@@ -348,8 +354,8 @@ struct SignatureImageView: View {
                         .font(.system(size: 18))
                         .foregroundColor(.gray)
                 }.frame(height: maxHeight)
-                .overlay(RoundedRectangle(cornerRadius: 4)
-                            .stroke(Color.gray))
+                    .overlay(RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.gray))
             }
         }.popover(isPresented: $showPopover) {
             ImagePicker(selectedImage: $selection, didSet: $isSet)
@@ -362,7 +368,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImage: UIImage
     @Binding var didSet: Bool
     var sourceType = UIImagePickerController.SourceType.photoLibrary
-     
+
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
         let imagePicker = UIImagePickerController()
         imagePicker.navigationBar.tintColor = .clear
@@ -371,23 +377,23 @@ struct ImagePicker: UIViewControllerRepresentable {
         imagePicker.delegate = context.coordinator
         return imagePicker
     }
- 
+
     func updateUIViewController(_ uiViewController: UIImagePickerController,
                                 context: UIViewControllerRepresentableContext<ImagePicker>) { }
-    
+
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-    
+
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let control: ImagePicker
-        
+
         init(_ control: ImagePicker) {
             self.control = control
         }
-     
+
         func imagePickerController(_ picker: UIImagePickerController,
-                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 control.selectedImage = image
                 control.didSet = true
@@ -401,7 +407,7 @@ struct SignatureTypeView: View {
     @Binding var text: String
     @Binding var fontFamily: String
     @Binding var color: Color
-    
+
     var body: some View {
         TextField(placeholderText, text: $text)
             .disableAutocorrection(true)
@@ -412,14 +418,13 @@ struct SignatureTypeView: View {
 
 struct SignatureViewTest: View {
     @State private var image: UIImage? = nil
-    
+
     var body: some View {
         NavigationView {
             VStack {
-              NavigationLink("GO", destination: SignatureView(availableTabs: [.draw, .image, .type], onSave: { image in
+                NavigationLink("GO", destination: SignatureView(availableTabs: [.draw, .image, .type], onSave: { image in
                     self.image = image
                 }, onCancel: {
-                    
                 }))
                 if image != nil {
                     Image(uiImage: image!)
@@ -444,17 +449,17 @@ extension Color {
             return UIColor(red: components.r, green: components.g, blue: components.b, alpha: components.a)
         }
     }
-    
+
     private var components: (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
         let scanner = Scanner(string: self.description.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
         var hexNumber: UInt64 = 0
         var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
         let result = scanner.scanHexInt64(&hexNumber)
         if result {
-            r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
-            g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
-            b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
-            a = CGFloat(hexNumber & 0x000000ff) / 255
+            r = CGFloat((hexNumber & 0xFF000000) >> 24) / 255
+            g = CGFloat((hexNumber & 0x00FF0000) >> 16) / 255
+            b = CGFloat((hexNumber & 0x0000FF00) >> 8) / 255
+            a = CGFloat(hexNumber & 0x000000FF) / 255
         }
         return (r, g, b, a)
     }
