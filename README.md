@@ -11,7 +11,7 @@ This is a fork of [Globulus'](https://github.com/globulus) repo that adds some a
 * Choose signature color.
 * Choose signature font.
 * Callback produces `UIImage` that you can save/use.
-* iOS 13/14 compatible.
+* iOS 13+ compatible.
 
 ![Preview](https://github.com/globulus/swiftui-digital-signature/blob/main/Images/preview.gif?raw=true)
 
@@ -20,12 +20,14 @@ This is a fork of [Globulus'](https://github.com/globulus) repo that adds some a
 This component is distributed as a **Swift package**. Just add the repo URL to your package list:
 
 ```text
-https://github.com/globulus/swiftui-digital-signature
+https://github.com/shainmack/swiftui-digital-signature/
 ```
 
 ## Sample usage
 
 ```swift
+import SignatureView
+
 struct SignatureViewTest: View {
   @State private var image: UIImage? = nil
     
