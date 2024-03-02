@@ -1,5 +1,5 @@
 //
-//  SignatureView.swift
+//  SwiftUIDigitalSignature.swift
 //  SwiftUI Recipes
 //
 //  Created by Gordan Glavaš on 28.06.2021..
@@ -34,14 +34,16 @@ public struct SignatureView: View {
     @State private var isImageSet = false
     @State private var text = ""
 
-    public init(availableTabs: [Tab] = Tab.allCases,
+    public init(placeholder _: String = "Placeholder", availableTabs: [Tab] = Tab.allCases,
                 onSave: @escaping (UIImage) -> Void,
-                onCancel: @escaping () -> Void, color: Color = .black, showColorOptions: Bool = false) {
+                onCancel: @escaping () -> Void, color: Color = .black, showColorOptions: Bool = false)
+    {
         self.availableTabs = availableTabs
         self.onSave = onSave
         self.onCancel = onCancel
         self.showColorOptions = showColorOptions
         self.color = color
+        placeholder = placeholder
         selectedTab = availableTabs.first!
     }
 
@@ -50,7 +52,7 @@ public struct SignatureView: View {
             HStack {
                 Button("Done", action: extractImageAndHandle)
                 Spacer()
-                Button("Cancel", action: onCancel)
+                Button("Clear signature", action: clear)
             }
             if availableTabs.count > 1 {
                 Picker(selection: $selectedTab, label: EmptyView()) {
@@ -62,7 +64,7 @@ public struct SignatureView: View {
                 .pickerStyle(SegmentedPickerStyle())
             }
             signatureContent
-            Button("Clear signature", action: clear)
+
             HStack {
                 if selectedTab == Tab.type {
                     FontFamilyPicker(selection: $fontFamily)
@@ -121,8 +123,7 @@ public struct SignatureView: View {
 
                 let attrs = [NSAttributedString.Key.font: UIFont(name: fontFamily, size: bigFontSize)!,
                              NSAttributedString.Key.foregroundColor: color.uiColor,
-                             NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                ]
+                             NSAttributedString.Key.paragraphStyle: paragraphStyle]
                 text.draw(with: CGRect(x: 0, y: 0, width: rendererWidth, height: rendererHeight),
                           options: .usesLineFragmentOrigin,
                           attributes: attrs,
@@ -132,7 +133,8 @@ public struct SignatureView: View {
         }
         if saveSignature {
             if let data = image.pngData(),
-               let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+               let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            {
                 let filename = docsDir.appendingPathComponent("Signature-\(Date()).png")
                 try? data.write(to: filename)
             }
@@ -267,15 +269,15 @@ struct SignatureDrawView: View {
         }
         .frame(height: maxHeight)
         .gesture(DragGesture()
-            .onChanged({ value in
+            .onChanged { value in
                 if drawingBounds.contains(value.location) {
                     drawing.addPoint(value.location)
                 } else {
                     drawing.addBreak()
                 }
-            }).onEnded({ _ in
+            }.onEnded { _ in
                 drawing.addBreak()
-            }))
+            })
         .overlay(RoundedRectangle(cornerRadius: 4)
             .stroke(Color.gray))
     }
@@ -329,7 +331,7 @@ struct DrawingPath {
 struct DrawShape: Shape {
     let drawingPath: DrawingPath
 
-    func path(in rect: CGRect) -> Path {
+    func path(in _: CGRect) -> Path {
         drawingPath.path
     }
 }
@@ -379,8 +381,8 @@ struct ImagePicker: UIViewControllerRepresentable {
         return imagePicker
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController,
-                                context: UIViewControllerRepresentableContext<ImagePicker>) { }
+    func updateUIViewController(_: UIImagePickerController,
+                                context _: UIViewControllerRepresentableContext<ImagePicker>) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -393,8 +395,9 @@ struct ImagePicker: UIViewControllerRepresentable {
             self.control = control
         }
 
-        func imagePickerController(_ picker: UIImagePickerController,
-                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        func imagePickerController(_: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any])
+        {
             if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 control.selectedImage = image
                 control.didSet = true
@@ -425,8 +428,7 @@ struct SignatureViewTest: View {
             VStack {
                 NavigationLink("GO", destination: SignatureView(availableTabs: [.draw, .image, .type], onSave: { image in
                     self.image = image
-                }, onCancel: {
-                }))
+                }, onCancel: {}))
                 if image != nil {
                     Image(uiImage: image!)
                 }
@@ -457,10 +459,10 @@ extension Color {
         var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
         let result = scanner.scanHexInt64(&hexNumber)
         if result {
-            r = CGFloat((hexNumber & 0xFF000000) >> 24) / 255
-            g = CGFloat((hexNumber & 0x00FF0000) >> 16) / 255
-            b = CGFloat((hexNumber & 0x0000FF00) >> 8) / 255
-            a = CGFloat(hexNumber & 0x000000FF) / 255
+            r = CGFloat((hexNumber & 0xFF00_0000) >> 24) / 255
+            g = CGFloat((hexNumber & 0x00FF_0000) >> 16) / 255
+            b = CGFloat((hexNumber & 0x0000_FF00) >> 8) / 255
+            a = CGFloat(hexNumber & 0x0000_00FF) / 255
         }
         return (r, g, b, a)
     }
