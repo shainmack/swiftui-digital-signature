@@ -34,7 +34,9 @@ struct SignatureViewTest: View {
   var body: some View {
     NavigationView {
       VStack {
-        NavigationLink("GO", destination: SignatureView(availableTabs: [.draw, .image, .type],
+        NavigationLink("GO", destination: SignatureView(
+          "Your signature here",
+          availableTabs: [.draw, .image, .type],
           onSave: { image in
             self.image = image
           }, onCancel: {
