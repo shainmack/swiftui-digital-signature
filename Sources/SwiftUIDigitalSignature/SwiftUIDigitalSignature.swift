@@ -34,7 +34,7 @@ public struct SignatureView: View {
     @State private var isImageSet = false
     @State private var text = ""
 
-    public init(placeholder _: String = "Placeholder", availableTabs: [Tab] = Tab.allCases,
+    public init(placeholder _: String = "Signature", availableTabs: [Tab] = Tab.allCases,
                 onSave: @escaping (UIImage) -> Void,
                 onCancel: @escaping () -> Void, color: Color = .black, showColorOptions: Bool = false)
     {
