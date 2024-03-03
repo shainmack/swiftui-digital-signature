@@ -62,6 +62,8 @@ struct SignatureViewTest: View {
 
 ## Changelog
 
+* 0.1.6 - added automatic locking states to the `Done` and `Clear` buttons
+* 0.1.5 - hotfix
 * 0.1.4 - Got rid of onCancel, moved clear button to top, made placeholder text a param
 * 0.1.3 - Adds rounded corners, selectable writing color, and choice of showing or hiding color selector
 * 0.1.2 - Added `availableTabs` initializer param.
