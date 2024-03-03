@@ -52,10 +52,10 @@ public struct SignatureView: View {
         VStack {
             HStack {
                 Button("Done", action: extractImageAndHandle)
-                    .diabled(signatureCompleted)
+                    .disabled(signatureCompleted)
                 Spacer()
                 Button("Clear signature", action: clear)
-                    .diabled(!signatureCompleted)
+                    .disabled(!signatureCompleted)
             }
             if availableTabs.count > 1 {
                 Picker(selection: $selectedTab, label: EmptyView()) {
