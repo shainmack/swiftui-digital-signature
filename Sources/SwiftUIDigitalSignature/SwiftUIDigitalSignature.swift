@@ -33,7 +33,6 @@ public struct SignatureView: View {
     @State private var image = UIImage()
     @State private var isImageSet = false
     @State private var text: String = ""
-    @State private var placeholderText: String
 
     public init(_ placeholder: String = "Signature", availableTabs: [Tab] = Tab.allCases,
                 onSave: @escaping (UIImage) -> Void,
