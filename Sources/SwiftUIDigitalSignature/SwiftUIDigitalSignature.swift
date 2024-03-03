@@ -3,7 +3,7 @@
 //  SwiftUI Recipes
 //
 //  Created by Gordan Glavaš on 28.06.2021..
-//  Updated by @shainmack on 22/2/2024
+//  Updated by @shainmack on 2/3/2024
 //
 
 import CoreGraphics
@@ -12,9 +12,9 @@ import UIKit
 
 private let fontFamlies = ["Zapfino", "SavoyeLetPlain", "SnellRoundhand", "SnellRoundhand-Black"]
 private let bigFontSize: CGFloat = 44
-private let placeholderText = "Signature"
 private let maxHeight: CGFloat = 160
 private let lineWidth: CGFloat = 5
+private var placeholderText: String = ""
 
 public struct SignatureView: View {
     public let availableTabs: [Tab]
@@ -32,9 +32,10 @@ public struct SignatureView: View {
     @State private var drawing = DrawingPath()
     @State private var image = UIImage()
     @State private var isImageSet = false
-    @State private var text = ""
+    @State private var text: String = ""
+    @State private var placeholderText: String
 
-    public init(placeholder _: String = "Signature", availableTabs: [Tab] = Tab.allCases,
+    public init(_ placeholder: String = "Signature", availableTabs: [Tab] = Tab.allCases,
                 onSave: @escaping (UIImage) -> Void,
                 onCancel: @escaping () -> Void, color: Color = .black, showColorOptions: Bool = false)
     {
@@ -43,7 +44,7 @@ public struct SignatureView: View {
         self.onCancel = onCancel
         self.showColorOptions = showColorOptions
         self.color = color
-        self.placeholder = placeholder
+        placeholderText = placeholder
         selectedTab = availableTabs.first!
     }
 
@@ -459,10 +460,10 @@ extension Color {
         var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
         let result = scanner.scanHexInt64(&hexNumber)
         if result {
-            r = CGFloat((hexNumber & 0xFF00_0000) >> 24) / 255
-            g = CGFloat((hexNumber & 0x00FF_0000) >> 16) / 255
-            b = CGFloat((hexNumber & 0x0000_FF00) >> 8) / 255
-            a = CGFloat(hexNumber & 0x0000_00FF) / 255
+            r = CGFloat((hexNumber & 0xFF000000) >> 24) / 255
+            g = CGFloat((hexNumber & 0x00FF0000) >> 16) / 255
+            b = CGFloat((hexNumber & 0x0000FF00) >> 8) / 255
+            a = CGFloat(hexNumber & 0x000000FF) / 255
         }
         return (r, g, b, a)
     }
