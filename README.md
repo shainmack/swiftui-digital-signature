@@ -34,7 +34,9 @@ struct SignatureViewTest: View {
   var body: some View {
     NavigationView {
       VStack {
-        NavigationLink("GO", destination: SignatureView(availableTabs: [.draw, .image, .type],
+        NavigationLink("GO", destination: SignatureView(
+          "Your signature here",
+          availableTabs: [.draw, .image, .type],
           onSave: { image in
             self.image = image
           }, onCancel: {
@@ -51,15 +53,16 @@ struct SignatureViewTest: View {
 
 ## Parameters
 
-| Parameter | Description                                                                    |
-| :----------------- | :-------------------------------------------------------------------- |
-| `onSave`           | Closure that sets what to do when the save button is tapped           |
-| `onCancel`         | Closure that sets what to do when the cancel button is tapped         |
-| `color`            | SwiftUI Color param for writing color (Color). *Default = `.black`*   |
-| `showColorOptions` | A boolean option to show the color picker (Bool). *Default = `false`* |
+| Parameter | Description                                                                                      |
+| :----------------- | :-------------------------------------------------------------------------------------- |
+| `placeholder`      | Closure that sets what to do when the cancel button is tapped. *Default = `Signature`*  |
+| `onSave`           | Closure that sets what to do when the save button is tapped                             |
+| `color`            | SwiftUI Color param for writing color (Color). *Default = `.black`*                     |
+| `showColorOptions` | A boolean option to show the color picker (Bool). *Default = `false`*                   |
 
 ## Changelog
 
+* 0.1.4 - Got rid of onCancel, moved clear button to top, made placeholder text a param
 * 0.1.3 - Adds rounded corners, selectable writing color, and choice of showing or hiding color selector
 * 0.1.2 - Added `availableTabs` initializer param.
 * 0.1.1 - Fixed drawing bounds.
