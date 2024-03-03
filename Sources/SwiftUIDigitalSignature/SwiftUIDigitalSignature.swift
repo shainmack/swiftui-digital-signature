@@ -43,7 +43,7 @@ public struct SignatureView: View {
         self.onCancel = onCancel
         self.showColorOptions = showColorOptions
         self.color = color
-        placeholder = placeholder
+        self.placeholder = placeholder
         selectedTab = availableTabs.first!
     }
 
