@@ -14,7 +14,7 @@ private let fontFamlies = ["Zapfino", "SavoyeLetPlain", "SnellRoundhand", "Snell
 private let bigFontSize: CGFloat = 44
 private let maxHeight: CGFloat = 160
 private let lineWidth: CGFloat = 5
-private var placeholderText: String = ""
+private var signatureCompleted: Bool = false
 
 public struct SignatureView: View {
     public let availableTabs: [Tab]
@@ -33,17 +33,18 @@ public struct SignatureView: View {
     @State private var image = UIImage()
     @State private var isImageSet = false
     @State private var text: String = ""
+    var placeholder: String
 
     public init(_ placeholder: String = "Signature", availableTabs: [Tab] = Tab.allCases,
                 onSave: @escaping (UIImage) -> Void,
-                onCancel: @escaping () -> Void, color: Color = .black, showColorOptions: Bool = false)
+                color: Color = .black, showColorOptions: Bool = false)
     {
         self.availableTabs = availableTabs
         self.onSave = onSave
-        self.onCancel = onCancel
+        onCancel = {}
         self.showColorOptions = showColorOptions
         self.color = color
-        placeholderText = placeholder
+        self.placeholder = placeholder
         selectedTab = availableTabs.first!
     }
 
@@ -51,8 +52,10 @@ public struct SignatureView: View {
         VStack {
             HStack {
                 Button("Done", action: extractImageAndHandle)
+                    .diabled(signatureCompleted)
                 Spacer()
                 Button("Clear signature", action: clear)
+                    .diabled(!signatureCompleted)
             }
             if availableTabs.count > 1 {
                 Picker(selection: $selectedTab, label: EmptyView()) {
@@ -67,7 +70,7 @@ public struct SignatureView: View {
 
             HStack {
                 if selectedTab == Tab.type {
-                    FontFamilyPicker(selection: $fontFamily)
+                    FontFamilyPicker(selection: $fontFamily, placeholder: placeholder)
                 }
                 if showColorOptions {
                     ColorPickerCompat(selection: $color)
@@ -81,9 +84,7 @@ public struct SignatureView: View {
     private var signatureContent: some View {
         return Group {
             if selectedTab == .draw {
-                SignatureDrawView(drawing: $drawing,
-                                  fontFamily: $fontFamily,
-                                  color: $color)
+                SignatureDrawView(placeholder: placeholder, drawing: $drawing, fontFamily: fontFamily, color: color)
             } else if selectedTab == .image {
                 SignatureImageView(isSet: $isImageSet, selection: $image)
             } else if selectedTab == .type {
@@ -147,6 +148,7 @@ public struct SignatureView: View {
         image = UIImage()
         isImageSet = false
         text = ""
+        signatureCompleted = false
     }
 
     public enum Tab: CaseIterable, Hashable {
@@ -203,8 +205,8 @@ struct ColorPickerCompat: View {
 
 struct FontFamilyPicker: View {
     @Binding var selection: String
-
     @State private var showPopover = false
+    var placeholder: String
 
     var body: some View {
         Button(action: {
@@ -226,7 +228,7 @@ struct FontFamilyPicker: View {
     }
 
     private func buttonLabel(_ fontFamily: String, size: CGFloat) -> Text {
-        Text(placeholderText)
+        Text(placeholder)
             .font(.custom(fontFamily, size: size))
             .foregroundColor(.black)
     }
@@ -241,11 +243,19 @@ struct FramePreferenceKey: PreferenceKey {
 }
 
 struct SignatureDrawView: View {
+    var placeholder: String
     @Binding var drawing: DrawingPath
-    @Binding var fontFamily: String
-    @Binding var color: Color
+    var fontFamily: String
+    var color: Color
 
     @State private var drawingBounds: CGRect = .zero
+
+    init(placeholder: String, drawing: Binding<DrawingPath>, fontFamily: String, color: Color) {
+        self.placeholder = placeholder
+        _drawing = drawing
+        self.fontFamily = fontFamily
+        self.color = color
+    }
 
     var body: some View {
         ZStack {
@@ -258,7 +268,7 @@ struct SignatureDrawView: View {
                     drawingBounds = bounds
                 }
             if drawing.isEmpty {
-                Text(placeholderText)
+                Text(placeholder)
                     .foregroundColor(.gray)
                     .font(.custom(fontFamily, size: bigFontSize))
             } else {
@@ -408,12 +418,13 @@ struct ImagePicker: UIViewControllerRepresentable {
 }
 
 struct SignatureTypeView: View {
+    var placeholder: String
     @Binding var text: String
     @Binding var fontFamily: String
     @Binding var color: Color
 
     var body: some View {
-        TextField(placeholderText, text: $text)
+        TextField(placeholder, text: $text)
             .disableAutocorrection(true)
             .font(.custom(fontFamily, size: bigFontSize))
             .foregroundColor(color)
@@ -428,7 +439,7 @@ struct SignatureViewTest: View {
             VStack {
                 NavigationLink("GO", destination: SignatureView(availableTabs: [.draw, .image, .type], onSave: { image in
                     self.image = image
-                }, onCancel: {}))
+                }))
                 if image != nil {
                     Image(uiImage: image!)
                 }
@@ -459,10 +470,10 @@ extension Color {
         var r: CGFloat = 0.0, g: CGFloat = 0.0, b: CGFloat = 0.0, a: CGFloat = 0.0
         let result = scanner.scanHexInt64(&hexNumber)
         if result {
-            r = CGFloat((hexNumber & 0xFF000000) >> 24) / 255
-            g = CGFloat((hexNumber & 0x00FF0000) >> 16) / 255
-            b = CGFloat((hexNumber & 0x0000FF00) >> 8) / 255
-            a = CGFloat(hexNumber & 0x000000FF) / 255
+            r = CGFloat((hexNumber & 0xFF00_0000) >> 24) / 255
+            g = CGFloat((hexNumber & 0x00FF_0000) >> 16) / 255
+            b = CGFloat((hexNumber & 0x0000_FF00) >> 8) / 255
+            a = CGFloat(hexNumber & 0x0000_00FF) / 255
         }
         return (r, g, b, a)
     }
