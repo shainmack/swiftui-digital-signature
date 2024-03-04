@@ -82,13 +82,13 @@ public struct SignatureView: View {
     }
 
     private var signatureContent: some View {
-        return Group {
+        Group {
             if selectedTab == .draw {
-                SignatureDrawView(placeholder: placeholder, drawing: $drawing, fontFamily: fontFamily, color: color)
+                SignatureDrawView(placeholder: placeholder, fontFamily: fontFamily, color: color, drawing: $drawing)
             } else if selectedTab == .image {
                 SignatureImageView(isSet: $isImageSet, selection: $image)
             } else if selectedTab == .type {
-                SignatureTypeView(text: $text,
+                SignatureTypeView(placeholder: placeholder, text: $text,
                                   fontFamily: $fontFamily,
                                   color: $color)
             }
@@ -112,6 +112,7 @@ public struct SignatureView: View {
                 ctx.cgContext.drawPath(using: .stroke)
             }
             image = uiImage
+            signatureCompleted = true
         case .image:
             image = self.image
         case .type:
@@ -243,14 +244,14 @@ struct FramePreferenceKey: PreferenceKey {
 }
 
 struct SignatureDrawView: View {
-    var placeholder: String
     @Binding var drawing: DrawingPath
+    @State private var drawingBounds: CGRect = .zero
+
+    var placeholder: String
     var fontFamily: String
     var color: Color
 
-    @State private var drawingBounds: CGRect = .zero
-
-    init(placeholder: String, drawing: Binding<DrawingPath>, fontFamily: String, color: Color) {
+    init(placeholder: String, fontFamily: String, color: Color, drawing: Binding<DrawingPath>) {
         self.placeholder = placeholder
         _drawing = drawing
         self.fontFamily = fontFamily
