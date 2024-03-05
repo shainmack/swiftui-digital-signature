@@ -55,7 +55,6 @@ public struct SignatureView: View {
                     .disabled(signatureCompleted)
                 Spacer()
                 Button("Clear signature", action: clear)
-                    .disabled(!signatureCompleted)
             }
             if availableTabs.count > 1 {
                 Picker(selection: $selectedTab, label: EmptyView()) {
