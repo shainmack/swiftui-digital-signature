@@ -60,6 +60,10 @@ struct SignatureViewTest: View {
 | `color`            | SwiftUI Color param for writing color (Color). *Default = `.black`*                     |
 | `showColorOptions` | A boolean option to show the color picker (Bool). *Default = `false`*                   |
 
+## Known Issues
+* If using multiple `SignatureView`s on a single page, the `Done` button for either will trigger the `signatureCompleted` state on all of them.
+* *Workaround:* use an `if` to conditionally show each one, only when the prior has been signed.
+
 ## Changelog
 
 * 0.1.6 - added automatic locking states to the `Done` and `Clear` buttons
