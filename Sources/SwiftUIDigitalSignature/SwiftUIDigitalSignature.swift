@@ -52,7 +52,7 @@ public struct SignatureView: View {
         VStack {
             HStack {
                 Button("Done", action: extractImageAndHandle)
-                    .disabled(signatureCompleted)
+                    .disabled(self.signatureCompleted)
                 Spacer()
                 Button("Clear signature", action: clear)
             }
